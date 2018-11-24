@@ -2,7 +2,6 @@
 
 import gym
 import numpy as np
-
 from .sim import Simulator
 
 CFG = [{'id':1, 'pos':[0., 0., 0.]}]
@@ -38,7 +37,7 @@ class HoverEnv(gym.Env):
 
     def render(self):
         if self.renderer is None:
-            from vis.visVispy import VisVispy
+            from .vis.visVispy import VisVispy
             self.renderer = VisVispy()
         self.renderer.update(self.sim.t, self.sim.crazyflies)
 

@@ -2,7 +2,7 @@
 
 import math
 import numpy as np
-import .cfsim.cffirmware as firm
+from .cfsim import cffirmware as firm
 
 def arr2vec(a):
     """ Converts python/numpy arrays to firmware 3d vector type """
