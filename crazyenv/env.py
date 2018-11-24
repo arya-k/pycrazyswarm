@@ -24,7 +24,7 @@ class HoverEnv(gym.Env):
 
         obs = self._get_obs()
         reward = 1 - abs(1 - obs[2])
-        return obs, reward, self.sim.t > 5, {}
+        return obs, reward, self.sim.t > 10, {}
 
     def reset(self):
         self.sim.t = 0.
