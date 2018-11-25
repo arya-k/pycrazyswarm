@@ -20,20 +20,24 @@ class HoverEnv(gym.Env):
     def step(self, u):
         u = np.clip(u, -self.max_speed, self.max_speed)
         self.sim.crazyflies[0].goTo(u, 0., 1., self.sim.t)
+
         self.sim.t += self.sim.dt
 
-        obs = self._get_obs()
-        reward = 1 - abs(1 - obs[2])
-        return obs, reward, self.sim.t > 10, {}
+        obs = self.sim.crazyflies[0].position(self.sim.t)
+        rpy = self.sim.crazyflies[0].rpy(self.sim.t)
+        diff = np.array([0.,0.,1.]) - obs
+
+        cost = 4. * np.sqrt(diff.dot(diff))
+        cost += 0.05 * u.dot(u)
+        cost += 0.05 * rpy.dot(rpy)
+
+        return obs, -cost, self.sim.t > 10, {}
 
     def reset(self):
         self.sim.t = 0.
         self.sim._init_cfs()
         self.sim.crazyflies[0].takeoff(0., 1., -1) # prep for goTo commands
-        return self._get_obs()
-
-    def _get_obs(self):
-        return self.sim.crazyflies[0].position(self.sim.t)
+        return np.array([0., 0., 0.])
 
     def render(self):
         if self.renderer is None:

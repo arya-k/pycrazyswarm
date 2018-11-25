@@ -52,7 +52,7 @@ class Crazyflie:
             x_body = np.cross(y_body, z_body)
             pitch = math.asin(-x_body[2])
             roll = math.atan2(y_body[2], z_body[2])
-            return (roll, pitch, yaw)
+            return np.array([roll, pitch, yaw])
 
     def _vposition(self, t):
         if self.planner.state == firm.TRAJECTORY_STATE_IDLE:
