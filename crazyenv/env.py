@@ -24,12 +24,12 @@ class HoverEnv(gym.Env):
         self.sim.t += self.sim.dt
 
         obs = self.sim.crazyflies[0].position(self.sim.t)
-        rpy = self.sim.crazyflies[0].rpy(self.sim.t)
+        rp = self.sim.crazyflies[0].rpy(self.sim.t)[:2]
         diff = np.array([0.,0.,1.]) - obs
 
         cost = 4. * np.sqrt(diff.dot(diff))
         cost += 0.05 * u.dot(u)
-        cost += 0.05 * rpy.dot(rpy)
+        cost += 0.05 * rp.dot(rp)
 
         return obs, -cost, self.sim.t > 10, {}
 
