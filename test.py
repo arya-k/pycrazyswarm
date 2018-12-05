@@ -19,7 +19,7 @@ scale = np.array([1,1,.5])
 for ep in range(NUM_EPS):
     total_reward = 0.0
 
-    loc = np.random.normal(mean, scale * (1 - (ep/NUM_EPS)))
+    loc = np.random.normal(mean, scale)
 
     obs = env.reset(loc)
     for _ in range(100):
