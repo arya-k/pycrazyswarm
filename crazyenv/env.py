@@ -3,8 +3,7 @@
 import gym
 import numpy as np
 from .sim import Simulator
-
-CFG = [{'id':1, 'pos':[0., 0., 0.]}]
+from collections import deque
 
 class HoverEnv(gym.Env):
     """ Gym Env to train a single drone to hover at 1m. """
@@ -15,28 +14,37 @@ class HoverEnv(gym.Env):
         self.observation_dim = 3
 
         self.renderer = None
-        self.sim = Simulator(self.dt, CFG)
+        self.sim = Simulator(self.dt)
 
     def step(self, u):
-        u = np.clip(u, -self.max_speed, self.max_speed)
+        u = self.max_speed * np.array(u).astype(np.float64)
         self.sim.crazyflies[0].goTo(u, 0., 1., self.sim.t)
 
         self.sim.t += self.sim.dt
 
         obs = self.sim.crazyflies[0].position(self.sim.t)
-        diff = np.array([0.,0.,1.]) - obs
-        r = np.array(obs[:2])
+        reward = self._reward(obs, u) 
+        return obs, reward, self.sim.t > 10, {}
 
-        cost = 4. * np.sqrt(diff.dot(diff))
-        cost += 10. * np.sqrt(r.dot(r))
+    def _reward(self, obs, u):
+        diff = np.array([0., 0., 1.]) - obs
+        u_mag = np.linalg.norm(u)
+        diff_mag = np.linalg.norm(diff)
+        u_ = u / u_mag if u_mag else np.zeros(u.shape)
+        diff_ = diff / diff_mag if diff_mag else np.zeros(diff.shape)
+        cos_theta = np.clip(np.dot(u_, diff_), -1., 1.)
 
-        return obs, -cost, self.sim.t > 10, {}
+        dir_reward = 1. / (1.1 - cos_theta)
+        dist_reward = 1. / (.1 + diff_mag)
+        movement_cost = u_mag * 1 # used to be 10
 
-    def reset(self):
+        return dir_reward + dist_reward - movement_cost
+
+    def reset(self, loc=[0,0,0]):
         self.sim.t = 0.
-        self.sim._init_cfs()
-        self.sim.crazyflies[0].takeoff(0., 1., -1) # prep for goTo commands
-        return np.array([0., 0., 0.])
+        self.sim._init_cfs([{'id':1, 'pos':[loc[0], loc[1], 0]}])
+        self.sim.crazyflies[0].takeoff(loc[2], 10., -10)
+        return np.array(loc)
 
     def render(self):
         if self.renderer is None:
