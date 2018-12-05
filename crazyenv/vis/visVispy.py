@@ -10,7 +10,7 @@ from vispy.scene.cameras import TurntableCamera
 
 class VisVispy:
     def __init__(self):
-        self.canvas = scene.SceneCanvas(keys='interactive', size=(1024, 768), show=True, config=dict(samples=4), resizable=True)
+        self.canvas = scene.SceneCanvas(keys='interactive', size=(1900, 1145), show=True, config=dict(samples=4), resizable=True)
 
         # Set up a viewbox to display the cube with interactive arcball
         self.view = self.canvas.central_widget.add_view()
