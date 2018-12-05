@@ -6,7 +6,6 @@ from .cfsim import cffirmware as firm
 
 def arr2vec(a):
     """ Converts python/numpy arrays to firmware 3d vector type """
-    a = np.array(a).astype(np.float64)
     return firm.mkvec(a[0], a[1], a[2])
 
 class Crazyflie:
@@ -66,14 +65,12 @@ class Crazyflie:
 
 class Simulator:
     """ Manages the crazyflies, and keeps track of the clock. """
-    def __init__(self, dt, cfg):
+    def __init__(self, dt):
         self.t = 0.
         self.dt = dt
-        self.cfg = cfg
-        self._init_cfs()
 
-    def _init_cfs(self):
+    def _init_cfs(self, cfg):
         self.crazyflies = [Crazyflie(cf['id'], cf['pos'])
-            for cf in self.cfg]
+            for cf in cfg]
 
 
