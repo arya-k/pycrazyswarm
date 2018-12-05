@@ -1,4 +1,4 @@
-firmdir = ../../../../../../crazyflie-firmware
+firmdir = ./crazyflie-firmware
 modinc = $(firmdir)/src/modules/interface
 modsrc = $(firmdir)/src/modules/src
 
@@ -12,4 +12,4 @@ swig:
 		-o _cffirmware.so
 
 clean:
-	rm -f cffirmware.py cffirmware.pyc _cffirmware.so __init__.pyc
+	rm -f cffirmware.py cffirmware.pyc _cffirmware.so __init__.pyc __init__.py
