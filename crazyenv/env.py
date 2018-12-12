@@ -38,7 +38,7 @@ class HoverEnv(gym.Env):
 
         dir_reward = 1. / (1.1 - cos_theta)
         dist_reward = 1. / (.1 + diff_mag)
-        movement_cost = u_mag * 1 # used to be 10
+        movement_cost = u_mag * 1
 
         return dir_reward + dist_reward - movement_cost
 
@@ -93,9 +93,7 @@ class AtoBEnv(gym.Env):
         diff_mag = np.linalg.norm(diff)
 
         dist_reward = 1. / (.1 + diff_mag)
-        movement_cost = u_mag * 1 # used to be 10
-
-        return dist_reward +  movement_cost/(1+dist_reward)
+        return dist_reward +  u_mag/(1+dist_reward)
 
     def reset(self):
         self.sim.t = 0.
@@ -151,9 +149,7 @@ class ABCEnv(gym.Env):
         diff_mag = np.linalg.norm(diff)
 
         dist_reward = 1. / (.1 + diff_mag)
-        movement_cost = u_mag * 1 # used to be 10
-
-        return dist_reward +  movement_cost/(1+dist_reward)
+        return dist_reward +  u_mag/(1+dist_reward)
 
     def _reward(self, u):
         self.maxB = max(self.maxB, self._point_reward(self.B, u))
