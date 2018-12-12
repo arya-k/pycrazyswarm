@@ -20,12 +20,12 @@ class VisVispy:
         # add a colored 3D axis for orientation
         axis = scene.visuals.XYZAxis(parent=self.view.scene)
         self.cfs = []
-        self.goal = None
+        self.spheres = []
 
         # ground = scene.visuals.Plane(6.0, 6.0, direction="+z", color=(0.3, 0.3, 0.3, 1.0), parent=self.view.scene)
 
 
-    def update(self, t, crazyflies, goal=None):
+    def update(self, t, crazyflies, spheres=[]):
         if len(self.cfs) == 0:
             verts, faces, normals, nothin = io.read_mesh(os.path.join(os.path.dirname(__file__), "crazyflie2.obj.gz"))
             for i in range(0, len(crazyflies)):
@@ -33,11 +33,13 @@ class VisVispy:
                 mesh.transform = transforms.MatrixTransform()
                 self.cfs.append(mesh)
 
-        if goal is not None:
-            if self.goal is None:
-                self.goal = scene.visuals.Sphere(radius=.02, color='#FF0000', parent=self.view.scene)
-                self.goal.transform = transforms.STTransform(translate=goal)
-            self.goal.transform.translate = goal
+        if spheres:
+            if not self.spheres:
+                for i,s in enumerate(spheres):
+                    self.spheres.append(scene.visuals.Sphere(radius=.02, color='#FF0000' if i else '#0000FF', parent=self.view.scene))
+                    self.spheres[-1].transform = transforms.STTransform(translate=s)
+            for i,s in enumerate(spheres):
+                self.spheres[i].transform.translate = s
 
         for i in range(0, len(self.cfs)):
             x, y, z = crazyflies[i].position(t)
