@@ -33,13 +33,13 @@ class VisVispy:
                 mesh.transform = transforms.MatrixTransform()
                 self.cfs.append(mesh)
 
-        if spheres:
+        if spheres: # sphere: (position, color)
             if not self.spheres:
-                for i,s in enumerate(spheres):
-                    self.spheres.append(scene.visuals.Sphere(radius=.02, color='#FF0000' if i else '#0000FF', parent=self.view.scene))
-                    self.spheres[-1].transform = transforms.STTransform(translate=s)
-            for i,s in enumerate(spheres):
-                self.spheres[i].transform.translate = s
+                for pos,color in spheres:
+                    self.spheres.append(scene.visuals.Sphere(radius=.02, color=color, parent=self.view.scene))
+                    self.spheres[-1].transform = transforms.STTransform(translate=pos)
+            for i, (pos, color) in enumerate(spheres):
+                self.spheres[i].transform.translate = pos
 
         for i in range(0, len(self.cfs)):
             x, y, z = crazyflies[i].position(t)
