@@ -98,17 +98,16 @@ class AtoBEnv(gym.Env):
     def reset(self):
         self.sim.t = 0.
         self.target = np.random.normal([0,0,1], [.3,.3,.3])
-
-        loc = np.random.normal(self.target, [.3,.3,.3])
-        self.sim._init_cfs([{'id':1, 'pos':[loc[0], loc[1], 0]}])
-        self.sim.crazyflies[0].takeoff(loc[2], 10., -10)
+        self.A = np.random.normal(self.target, [.3,.3,.3])
+        self.sim._init_cfs([{'id':1, 'pos':[self.A[0], self.A[1], 0]}])
+        self.sim.crazyflies[0].takeoff(self.A[2], 10., -10)
         return self._obs()
 
     def render(self):
         if self.renderer is None:
             from .vis.visVispy import VisVispy
             self.renderer = VisVispy()
-        self.renderer.update(self.sim.t, self.sim.crazyflies, [(self.target, '#FF0000')])
+        self.renderer.update(self.sim.t, self.sim.crazyflies, [(self.A, '#0000FF'), (self.target, '#FF0000')])
 
     def close(self): 
         if self.renderer is not None:

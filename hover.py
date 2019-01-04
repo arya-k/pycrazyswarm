@@ -15,7 +15,7 @@ from utils import display_graph, visualize_sim
 from crazyenv.env import HoverEnv
 
 training_vars = {
-    'EP_MAX': 750,
+    'EP_MAX': 1000,
     'EP_LEN': 256,
     'GAMMA': 0.98,
     'A_LR': 1e-4,

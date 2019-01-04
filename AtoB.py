@@ -15,7 +15,7 @@ from utils import display_graph, visualize_sim
 from crazyenv.env import AtoBEnv
 
 training_vars = {
-    'EP_MAX': 6000,
+    'EP_MAX': 10000,
     'EP_LEN': 256,
     'GAMMA': 0.98,
     'A_LR': 1e-4,
