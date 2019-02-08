@@ -1,9 +1,10 @@
 import os
 import math
 import numpy as np
+import random
 
 from vispy import scene, app, io
-from vispy.color import Color
+from vispy.color import Color, get_color_names
 from vispy.visuals import transforms
 from vispy.scene.cameras import TurntableCamera
 
@@ -21,11 +22,14 @@ class VisVispy:
         axis = scene.visuals.XYZAxis(parent=self.view.scene)
         self.cfs = []
         self.spheres = []
-
+        self.crumbs = []
+        self.markers = scene.visuals.Markers(parent=self.view.scene)
+        self.markers.transform = transforms.STTransform()
+        self.obstacles = []
         # ground = scene.visuals.Plane(6.0, 6.0, direction="+z", color=(0.3, 0.3, 0.3, 1.0), parent=self.view.scene)
 
 
-    def update(self, t, crazyflies, spheres=[]):
+    def update(self, t, crazyflies, spheres=[], obstacles=[], crumb=None):
         if len(self.cfs) == 0:
             verts, faces, normals, nothin = io.read_mesh(os.path.join(os.path.dirname(__file__), "crazyflie2.obj.gz"))
             for i in range(0, len(crazyflies)):
@@ -33,13 +37,29 @@ class VisVispy:
                 mesh.transform = transforms.MatrixTransform()
                 self.cfs.append(mesh)
 
+        if crumb is not None:
+            self.crumbs.append(crumb)
+            self.markers.set_data(np.array(self.crumbs), size=5, face_color='black', edge_color='black')
+        elif self.crumbs:
+            self.markers.set_data(np.array([[1e10,1e10]]))
+            self.crumbs = []
+
+
         if spheres: # sphere: (position, color)
             if not self.spheres:
-                for pos,color in spheres:
+                for pos, color in spheres:
                     self.spheres.append(scene.visuals.Sphere(radius=.02, color=color, parent=self.view.scene))
                     self.spheres[-1].transform = transforms.STTransform(translate=pos)
             for i, (pos, color) in enumerate(spheres):
                 self.spheres[i].transform.translate = pos
+
+        if obstacles: # cube : (position, size)
+            if not self.obstacles:
+                for pos, size in obstacles:
+                    self.obstacles.append(scene.visuals.Cube(size=size, color=random.choice(get_color_names()), parent=self.view.scene))
+                    self.obstacles[-1].transform = transforms.STTransform(translate=pos)
+            for i, (pos, size) in enumerate(obstacles):
+                self.obstacles[i].transform.translate = pos
 
         for i in range(0, len(self.cfs)):
             x, y, z = crazyflies[i].position(t)
