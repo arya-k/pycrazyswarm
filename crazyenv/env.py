@@ -150,8 +150,6 @@ class ABCEnv(gym.Env):
         PO_r = PO - PO_norm # relative to center projection of PO onto plane
         p_cl = PO_r/np.linalg.norm(PO_r)*self.circle[1] + self.circle[0] # closest point
 
-        self.p_cl = p_cl # TODO: REMOVE
-
         rel_p_mid = (p_cl + self.C - 2*self.circle[0])
         rel_p_mid *= self.circle[1] / np.linalg.norm(rel_p_mid) # midpoint relative to center
 
@@ -163,8 +161,6 @@ class ABCEnv(gym.Env):
 
         p_mid = rel_p_mid + self.circle[0] # absolute midpoint
 
-        self.p_mid = p_mid #TODO: REMOVE
-
         new_circ = self._fit_circle(obs[:3], p_mid, self.C) # new fitted circle
 
         o_proj = self.circle[0] + PO_r # absolute projection drone onto circle
@@ -173,8 +169,8 @@ class ABCEnv(gym.Env):
             u_des *= -1
 
         cos_theta = np.dot(u, u_des)/np.linalg.norm(u)/np.linalg.norm(u_des)
-
-        return cos_theta - 0.25 * np.linalg.norm(self.C - obs[:3])#1 / (1.1 - cos_theta)
+        closest_distance = np.linalg.norm(obs[:3]-p_cl)
+        return cos_theta * np.linalg.norm(u)
 
     def _fit_circle(self, A, B, C):
         a = np.linalg.norm(A-B)
@@ -212,14 +208,20 @@ class ABCEnv(gym.Env):
 
         self.sim._init_cfs([{'id':1, 'pos':[A[0], A[1], 0]}])
         self.sim.crazyflies[0].takeoff(A[2], 10., -10)
+
+        if self.renderer is not None:
+            self.renderer.update(self.sim.t, self.sim.crazyflies)
+
         return self._obs()
 
     def render(self):
         if self.renderer is None:
             from .vis.visVispy import VisVispy
             self.renderer = VisVispy()
-        self.renderer.update(self.sim.t, self.sim.crazyflies, [
-            (self.A, '#FF0000'), (self.B, '#00FF00'), (self.C, '#0000FF'), (self.p_cl, '#FF00FF'), (self.p_mid, '#00FFFF')])
+        self.renderer.update(self.sim.t, self.sim.crazyflies, 
+            spheres=[(self.A, '#FF0000'), (self.B, '#00FF00'), (self.C, '#0000FF')],
+            obstacles=  [((0,0,0), .1)],
+            crumb=self.sim.crazyflies[0].position(self.sim.t))
 
     def close(self): 
         if self.renderer is not None:

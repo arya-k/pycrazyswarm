@@ -133,16 +133,17 @@ class PPO():
     def save(self, save_path):
         data = self.tr_vars
         params = self.sess.run(self.params)
+        globalvars = None #[self.g.GLOBAL_UPDATE_COUNTER, self.g.GLOBAL_EP, self.g.GLOBAL_RUNNING_R, self.g.]
 
         if isinstance(save_path, str):
             _, ext = os.path.splitext(save_path)
             if ext == "":
                 save_path += ".pkl"
             with open(save_path, "wb") as file_:
-                cloudpickle.dump((data, params), file_)
+                cloudpickle.dump((data, params, globalvars), file_)
         else:
             # Here save_path is a file-like object, not a path
-            cloudpickle.dump((data, params), save_path)
+            cloudpickle.dump((data, params, globalvars), save_path)
 
     @classmethod
     def load(cls, load_path):
@@ -154,10 +155,10 @@ class PPO():
                     raise ValueError("Error: the file {} could not be found".format(load_path))
 
             with open(load_path, "rb") as file:
-                data, params = cloudpickle.load(file)
+                data, params, _ = cloudpickle.load(file)
         else:
             # Here load_path is a file-like object, not a path
-            data, params = cloudpickle.load(load_path)
+            data, params, _ = cloudpickle.load(load_path)
 
         model = cls(data)
 
