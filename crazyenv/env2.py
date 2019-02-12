@@ -51,7 +51,7 @@ class StaticObstEnv(gym.Env):
     """ Gym Env to train a single drone to travel between two arbitrary points. """
 
     act_dim = 3
-    obs_dim = 6
+    obs_dim = 10
 
     def __init__(self):
         self.max_speed = .1 #m/s in a given direction
@@ -61,12 +61,18 @@ class StaticObstEnv(gym.Env):
         self.sim = Simulator(self.dt)
 
     def step(self, u):
+
+        if (np.isnan(u).any()):
+            print("GOT A NAN. STATE: {}, u: {}".format(self._obs(), u))
+            exit()
+
+        reward = self._reward(self._obs(), u) # reward has to be based on previous action 
+
         u = self.max_speed * np.array(u).astype(np.float64)
         self.sim.crazyflies[0].goTo(u, 0., 1., self.sim.t)
         self.sim.t += self.sim.dt
 
         obs = self._obs()
-        reward = self._reward(obs, u) 
         return obs, reward, False, {}
 
     def _obs(self):
@@ -76,9 +82,9 @@ class StaticObstEnv(gym.Env):
         return np.concatenate((pos, self.B, err, grad))
 
     def _reward(self, obs, u):
-        grad = self.pfc.gradient(obs[:3])
-        return -.5 * np.dot(u-grad, u-grad) # EASY MODE
-        return self.pfc.error(obs[:3]) # HARD MODE
+        # grad = self.pfc.gradient(obs[:3])
+        # return -.5 * np.dot(u-grad, u-grad) # EASY MODE
+        return -1 * self.pfc.error(obs[:3]) # HARD MODE
 
     def reset(self):
         self.sim.t = 0.

@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 
 """
@@ -56,7 +57,7 @@ class PPO():
             tr_vars['C_LR']).minimize(self.closs)
 
         # actor
-        pi, pi_params, mu = self._build_anet('pi', trainable=True)
+        pi, pi_params, mu = self._build_anet('pi', trainable=True, log=False)
         oldpi, oldpi_params, _ = self._build_anet('oldpi', trainable=False)
         self.sample_op = tf.squeeze(pi.sample(1), axis=0) # sampling action
         self.det_op = tf.squeeze(mu.sample(1), axis=0) # determinstic action
@@ -67,12 +68,14 @@ class PPO():
         self.tfadv = tf.placeholder(tf.float32, [None, 1], 'advantage')
         
         ratio = pi.prob(self.tfa) / (oldpi.prob(self.tfa) + 1e-5)
-        surr = ratio * self.tfadv # surrogate loss
+        surr = ratio * self.tfadv # surrogate 
 
         self.aloss = -tf.reduce_mean(tf.minimum(surr, # clipped surrogate objective
             tf.clip_by_value(ratio,
                 1. - tr_vars['EPSILON'],
                 1. + tr_vars['EPSILON']) * self.tfadv))
+
+        self.printloss = tf.Print(self.aloss, [self.aloss], "Loss: ")
 
         self.atrain_op = tf.train.AdamOptimizer(
             tr_vars['A_LR']).minimize(self.aloss)
@@ -103,14 +106,18 @@ class PPO():
                 self.g.GLOBAL_UPDATE_COUNTER = 0 # reset counter
                 self.g.ROLLING_EVENT.set() # set roll-out available
 
-    def _build_anet(self, name, trainable=True):
+    def _build_anet(self, name, trainable=True, log=False):
         ''' Build the actor's network. Returns pi and mu. '''
         a_dim = self.tr_vars['ENV'].act_dim # action dimensions
         with tf.variable_scope(name):
             l1 = tf.layers.dense(self.tfs, 200, tf.nn.relu, trainable=trainable)
+            if log: l1 = tf.Print(l1, [l1], "l1: ", summarize=200)
             l2 = tf.layers.dense(l1, 200, tf.nn.relu, trainable=trainable)
-            mu = tf.layers.dense(l2, a_dim, tf.nn.tanh, trainable=trainable)
+            if log: l2 = tf.Print(l2, [l2], "l2: ", summarize=200)
+            mu = tf.layers.dense(l2, a_dim, tf.nn.softsign, trainable=trainable)
+            if log: mu = tf.Print(mu, [mu], "mu: ", summarize=a_dim)
             sigma = tf.layers.dense(l2, a_dim, tf.nn.softplus, trainable=trainable)
+            if log: sigma = tf.Print(sigma, [sigma], "sigma: ", summarize=a_dim)
             norm_dist = tf.distributions.Normal(loc=mu, scale=sigma)
         params = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=name)
         return norm_dist, params, tf.distributions.Normal(loc=mu, scale=0.)
@@ -118,7 +125,12 @@ class PPO():
     def sample_action(self, s):
         ''' Get the sampling policy's action, given a state s. '''
         s = s[np.newaxis, :] # reshape the input
-        return self.sess.run(self.sample_op, {self.tfs: s})[0]
+        a = self.sess.run(self.sample_op, {self.tfs: s})[0]
+        self.sess.run(self.print_op)
+        # print(self.sess.run(self.aloss, {self.tfs: s, self.tfa: a[np.newaxis, :]})[0])
+        if (np.isnan(a).any()):
+            print(a, s)
+        return a
 
     def det_action(self, s):
         ''' Get the deterministic policy's action, given a state s. '''
