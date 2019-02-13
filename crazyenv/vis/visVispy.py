@@ -44,7 +44,6 @@ class VisVispy:
             self.markers.set_data(np.array([[1e10,1e10]]))
             self.crumbs = []
 
-
         if spheres: # sphere: (position, color)
             if not self.spheres:
                 for pos, color in spheres:
