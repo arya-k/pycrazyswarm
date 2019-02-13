@@ -21,6 +21,4 @@ while 1:
     env.render()
     o, e, *_ = env.step(u);
     u = o[-3:]
-
-    if i%20 == 0:
-      print(i)
+  # input("Press ENTER to reset env. ")
