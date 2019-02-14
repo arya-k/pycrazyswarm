@@ -79,18 +79,21 @@ class StaticObstEnv(gym.Env):
         self.sim.t += self.sim.dt
 
         obs = self._obs()
-        return obs, reward, self.sim.t > 100, {}
+        return obs, reward, self.sim.t > 200, {}
 
     def _obs(self):
         pos = self.sim.crazyflies[0].position(self.sim.t)
         err = [self.pfc.error(pos)]
         grad = self.pfc.gradient(pos)
+
+        if np.linalg.norm(grad) > np.linalg.norm(self.action_space.high): # clip the gradient
+            grad *= np.linalg.norm(self.action_space.high) / np.linalg.norm(grad)
+
         return np.concatenate((pos, self.B, err, grad))
 
     def _reward(self, obs, u):
         grad = self.pfc.gradient(obs[:3])
-        return np.dot(u, grad) # ATTEMPT 2
-        # return -1 * self.pfc.error(obs[:3]) # ATTEMPT 1
+        return np.dot(u, grad) # just try to match the gradient.
 
     def reset(self):
         self.sim.t = 0.
