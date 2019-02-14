@@ -38,8 +38,9 @@ class VisVispy:
                 self.cfs.append(mesh)
 
         if crumb is not None:
-            self.crumbs.append(crumb)
-            self.markers.set_data(np.array(self.crumbs), size=5, face_color='black', edge_color='black')
+            if len(self.crumbs) == 0 or np.linalg.norm(self.crumbs[-1]-crumb) > 0.05:
+                self.crumbs.append(crumb)
+                self.markers.set_data(np.array(self.crumbs), size=5, face_color='black', edge_color='black')
         elif self.crumbs:
             self.markers.set_data(np.array([[1e10,1e10]]))
             self.crumbs = []
