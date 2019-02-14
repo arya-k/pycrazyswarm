@@ -2,18 +2,20 @@
 
 import gym
 import numpy as np
+from gym.spaces import Box
 from .sim import Simulator
 from collections import deque
 
 class HoverEnv(gym.Env):
     """ Gym Env to train a single drone to hover at 1m. """
 
-    act_dim = 3
-    obs_dim = 3
-
     def __init__(self):
         self.max_speed = 0.1 #m/s in a given direction
         self.dt = 0.1
+
+        high_obs = np.array([np.finfo(np.float64).max]*3)
+        self.action_space = Box(low=-self.max_speed, high=self.max_speed, shape=(3,), dtype=np.float64)
+        self.observation_space = Box(low=-high_obs, high=high_obs, dtype=np.float64)
 
         self.renderer = None
         self.sim = Simulator(self.dt)
@@ -26,7 +28,7 @@ class HoverEnv(gym.Env):
 
         obs = self.sim.crazyflies[0].position(self.sim.t)
         reward = self._reward(obs, u) 
-        return obs, reward, self.sim.t > 10, {}
+        return obs, reward, self.sim.t > 256., {}
 
     def _reward(self, obs, u):
         diff = np.array([0., 0., 1.]) - obs

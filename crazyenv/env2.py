@@ -79,7 +79,7 @@ class StaticObstEnv(gym.Env):
         self.sim.t += self.sim.dt
 
         obs = self._obs()
-        return obs, reward, False, {}
+        return obs, reward, self.sim.t > 100, {}
 
     def _obs(self):
         pos = self.sim.crazyflies[0].position(self.sim.t)
@@ -89,8 +89,8 @@ class StaticObstEnv(gym.Env):
 
     def _reward(self, obs, u):
         grad = self.pfc.gradient(obs[:3])
-        return -.5 * np.dot(u-grad, u-grad) # EASY MODE
-        return -1 * self.pfc.error(obs[:3]) # HARD MODE
+        return np.dot(u, grad) # ATTEMPT 2
+        # return -1 * self.pfc.error(obs[:3]) # ATTEMPT 1
 
     def reset(self):
         self.sim.t = 0.
