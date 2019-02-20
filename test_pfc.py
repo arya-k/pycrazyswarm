@@ -16,9 +16,12 @@ env.sim.crazyflies[0].takeoff(env.A[2], 10., -10)
 
 while 1:
   env.reset()
+
   u = np.array([0., 0., 0.]);
-  for i in range(500):
+  d = False
+
+  while(not d):
     env.render()
-    o, e, *_ = env.step(u);
+    o, e, d, _ = env.step(u);
     u = o[-3:]
-  # input("Press ENTER to reset env. ")
+  input("Press ENTER to reset env. ")
