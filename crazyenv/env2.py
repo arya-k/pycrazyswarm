@@ -7,7 +7,6 @@ from .sim import Simulator
 
 # TODO: TREAT BOXES AS ACTUAL BOXES IN THE PF CONTROLLER
 # TODO: MOVABLE OBSTACLES
-# TODO: SMOOTHEN THE TARGET TRAJECTORIES WITH BETTER REWARDS
 
 class PFController():
     """ Potential field controller to model obstacles. """
@@ -41,10 +40,10 @@ class PFController():
         f_1 = .5 * PFController.LAMBDA_1 * np.dot(self.target-obs, self.target-obs)
         f_2 = 0
         for obst in self.obstacles:
-            dist = np.linalg.norm(obs - obst[0]) - np.linalg.norm(obst[1])
+            obstacle_position = np.array([a if o < a else b if o > a+b else o for o,a,b in zip(obs, obst[0], obst[1])])
+            dist = np.linalg.norm(obs - obstacle_position)
             if (dist < PFController.P_STAR):
                 f_2 += .5 * PFController.LAMBDA_2 / (dist*dist)
-
         return f_1 + f_2
 
     def gradient(self, obs):
@@ -52,11 +51,10 @@ class PFController():
         v_1 = -1 * PFController.LAMBDA_1 * (obs - self.target)
         v_2 = np.array([0.]*3)
         for obst in self.obstacles:
-            obst_rad = np.linalg.norm(obst[1]/2)
-            dist = np.linalg.norm(obs - obst[0]) - obst_rad
-            p_do = (obs - obst[0]) * (dist / (dist + obst_rad))
+            obstacle_position = np.array([a if o < a else b if o > a+b else o for o,a,b in zip(obs, obst[0], obst[1])])
+            dist = np.linalg.norm(obs - obstacle_position)
             if (dist < PFController.P_STAR):
-                v_2 += (PFController.LAMBDA_2 / (dist**4)) * p_do
+                v_2 += (PFController.LAMBDA_2 / (dist**4)) * (obs - obstacle_position)
         return v_1 + v_2
 
 
