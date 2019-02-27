@@ -40,7 +40,7 @@ class PFController():
         f_1 = .5 * PFController.LAMBDA_1 * np.dot(self.target-obs, self.target-obs)
         f_2 = 0
         for obst in self.obstacles:
-            obstacle_position = np.array([a if o < a else b if o > a+b else o for o,a,b in zip(obs, obst[0], obst[1])])
+            obstacle_position = np.array([c-r if o < c-r else c+r if o > c+r else o for o,c,r in zip(obs, obst[0], obst[1])])
             dist = np.linalg.norm(obs - obstacle_position)
             if (dist < PFController.P_STAR):
                 f_2 += .5 * PFController.LAMBDA_2 / (dist*dist)
@@ -51,7 +51,7 @@ class PFController():
         v_1 = -1 * PFController.LAMBDA_1 * (obs - self.target)
         v_2 = np.array([0.]*3)
         for obst in self.obstacles:
-            obstacle_position = np.array([a if o < a else b if o > a+b else o for o,a,b in zip(obs, obst[0], obst[1])])
+            obstacle_position = np.array([c-r if o < c-r else c+r if o > c+r else o for o,c,r in zip(obs, obst[0], obst[1])])
             dist = np.linalg.norm(obs - obstacle_position)
             if (dist < PFController.P_STAR):
                 v_2 += (PFController.LAMBDA_2 / (dist**4)) * (obs - obstacle_position)
@@ -79,7 +79,8 @@ class StaticObstEnv(gym.Env):
         self.sim.t += self.sim.dt
 
         obs = self._obs()
-        return obs, reward, self.sim.t > 200, {}
+        return obs, reward, self.sim.t > 100, {}
+
 
     def _obs(self):
         pos = self.sim.crazyflies[0].position(self.sim.t)
