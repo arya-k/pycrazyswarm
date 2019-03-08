@@ -17,7 +17,7 @@ model = PPO2(
     n_steps=256,
     policy_kwargs=policy_kwargs,
     nminibatches=64,
-    learning_rate=2e-4,
+    learning_rate=1e-4,
     cliprange=0.2,
     tensorboard_log='/home/um/tensorboards/',
     verbose=1
@@ -30,7 +30,7 @@ model.learn(
 
 print("Finished training.")
 
-model.save("3")
+model.save("StaticNoAttraction3")
 # del model # remove to demonstrate saving and loading
 # model = PPO2.load("2")
 

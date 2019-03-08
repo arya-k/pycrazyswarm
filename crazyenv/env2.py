@@ -5,7 +5,6 @@ import numpy as np
 from gym.spaces import Box
 from .sim import Simulator
 
-# TODO: TREAT BOXES AS ACTUAL BOXES IN THE PF CONTROLLER
 # TODO: MOVABLE OBSTACLES
 
 class PFController():
@@ -37,25 +36,36 @@ class PFController():
 
     def error(self, obs):
         """ calculate the error at a specified obs location. """
-        f_1 = .5 * PFController.LAMBDA_1 * np.dot(self.target-obs, self.target-obs)
+        # f_1 = .5 * PFController.LAMBDA_1 * np.dot(self.target-obs, self.target-obs)
         f_2 = 0
         for obst in self.obstacles:
             obstacle_position = np.array([c-r if o < c-r else c+r if o > c+r else o for o,c,r in zip(obs, obst[0], obst[1])])
             dist = np.linalg.norm(obs - obstacle_position)
+            dist = max(dist, 1e-5) # minimum bound to avoid NaNs
             if (dist < PFController.P_STAR):
                 f_2 += .5 * PFController.LAMBDA_2 / (dist*dist)
-        return f_1 + f_2
+        return f_2 # + f_1
 
     def gradient(self, obs):
         """ calculate the gradient at a specified obs location. """
-        v_1 = -1 * PFController.LAMBDA_1 * (obs - self.target)
+        # v_1 = -1 * PFController.LAMBDA_1 * (obs - self.target)
         v_2 = np.array([0.]*3)
         for obst in self.obstacles:
             obstacle_position = np.array([c-r if o < c-r else c+r if o > c+r else o for o,c,r in zip(obs, obst[0], obst[1])])
             dist = np.linalg.norm(obs - obstacle_position)
+            dist = max(dist, 1e-5) # minimum bound to avoid NaNs
             if (dist < PFController.P_STAR):
                 v_2 += (PFController.LAMBDA_2 / (dist**4)) * (obs - obstacle_position)
-        return v_1 + v_2
+        return v_2 # + v_1
+
+    def hittingObstacles(self, obs):
+        """ Calculates whether we should stop the episode because we are too close to obstacles."""
+        for obst in self.obstacles:
+            obstacle_position = np.array([c-r if o < c-r else c+r if o > c+r else o for o,c,r in zip(obs, obst[0], obst[1])])
+            dist = np.linalg.norm(obs - obstacle_position)
+            if dist < 0.05: # 5cm from an obstacle
+                return True
+        return False
 
 
 class StaticObstEnv(gym.Env):
@@ -79,7 +89,7 @@ class StaticObstEnv(gym.Env):
         self.sim.t += self.sim.dt
 
         obs = self._obs()
-        return obs, reward, self.sim.t > 100, {}
+        return obs, reward, self.sim.t > 200 or self.pfc.hittingObstacles(obs[:3]), {}
 
 
     def _obs(self):
@@ -94,7 +104,8 @@ class StaticObstEnv(gym.Env):
 
     def _reward(self, obs, u):
         grad = self.pfc.gradient(obs[:3])
-        return np.dot(u, grad) # just try to match the gradient.
+        attraction = -1 * PFController.LAMBDA_1 * (obs[:3] - self.B)
+        return np.dot(u, grad + attraction) # just try to match the gradient.
 
     def reset(self):
         self.sim.t = 0.

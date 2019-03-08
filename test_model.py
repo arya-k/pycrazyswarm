@@ -7,7 +7,7 @@ from stable_baselines import PPO2
 
 from crazyenv.env2 import StaticObstEnv
 env = DummyVecEnv([lambda: StaticObstEnv()])
-model = PPO2.load("1")
+model = PPO2.load("StaticNoAttraction2")
 
 # Enjoy trained agent
 while True:
