@@ -55,10 +55,10 @@ class VisVispy:
 
         if obstacles: # cube : (position, size)
             if not self.obstacles:
-                for pos, size in obstacles:
+                for pos, size, _ in obstacles:
                     self.obstacles.append(scene.visuals.Cube(size=size, color=random.choice(get_color_names()), parent=self.view.scene))
                     self.obstacles[-1].transform = transforms.STTransform(translate=pos)
-            for i, (pos, size) in enumerate(obstacles):
+            for i, (pos, size, _) in enumerate(obstacles):
                 self.obstacles[i].transform.translate = pos
 
         for i in range(0, len(self.cfs)):
