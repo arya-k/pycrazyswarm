@@ -5,6 +5,7 @@ import numpy as np
 from gym.spaces import Box
 from .sim import Simulator
 
+# TODO: TREAT BOXES AS ACTUAL BOXES IN THE PF CONTROLLER
 # TODO: MOVABLE OBSTACLES
 
 class PFController():
