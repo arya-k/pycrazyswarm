@@ -5,9 +5,9 @@ from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common.vec_env import DummyVecEnv, SubprocVecEnv
 from stable_baselines import PPO2
 
-from crazyenv.env2 import StaticObstEnv
-env = DummyVecEnv([lambda: StaticObstEnv()])
-model = PPO2.load("1")
+from crazyenv.env2 import StaticObstEnv, DynamicObstEnv
+env = DummyVecEnv([lambda: DynamicObstEnv()])
+model = PPO2.load("StaticNoAttraction3")
 
 # Enjoy trained agent
 while True:
