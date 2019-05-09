@@ -1,7 +1,7 @@
-from crazyenv.env2 import StaticObstEnv, PFController
+from crazyenv.env2 import DynamicObstEnv, PFController
 import numpy as np
 
-env = StaticObstEnv()
+env = DynamicObstEnv()
 
 """
 env.reset()
@@ -15,13 +15,14 @@ env.sim.crazyflies[0].takeoff(env.A[2], 10., -10)
 """
 
 while 1:
-  env.reset()
+    env.reset()
 
-  u = np.array([0., 0., 0.]);
-  d = False
+    u = np.array([0., 0., 0.])
+    d = False
 
-  while(not d):
-    env.render()
-    o, e, d, _ = env.step(u);
-    u = o[-3:]
-  input("Press ENTER to reset env. ")
+    while(not d):
+        env.render()
+        o, e, d, _ = env.step(u)
+        print(env.sim.t)
+        u = o[-3:] - PFController.LAMBDA_1 * (o[:3] - env.B)
+    # input("Press ENTER to reset env. ")
