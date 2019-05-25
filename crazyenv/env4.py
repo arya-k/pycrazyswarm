@@ -1,5 +1,6 @@
 import gym
 import numpy as np
+from random import random
 from gym.spaces import Box
 from multiprocessing import Process, Pool, TimeoutError, Queue
 from .sim import Simulator
@@ -209,7 +210,6 @@ class DynamicSwarmEnv(gym.Env):
             low=-self.max_speed, high=self.max_speed, shape=(self.num_robots*3,), dtype=np.float64)
         self.observation_space = Box(
             low=-high_obs, high=high_obs, dtype=np.float64)
-        # self.target = np.array([0., 0., 0.])
 
         self.renderer = None
         self.sim = Simulator(self.dt)
@@ -223,7 +223,7 @@ class DynamicSwarmEnv(gym.Env):
 
         obs = self._obs()
         reward = self._reward(obs, actions)
-        return obs, reward, self.sim.t > 60 or DronePFController.isColliding(split_list(obs, 10)) or any(self.pfc.hittingObstacles(o) for o in split_list(obs, 10)), {}
+        return obs, reward, self.sim.t > 60, {} #or DronePFController.isColliding(split_list(obs, 10)) or any(self.pfc.hittingObstacles(o) for o in split_list(obs, 10)), {}
 
     def _obs(self):
         positions = [cf.position(self.sim.t) for cf in self.sim.crazyflies]
@@ -255,7 +255,7 @@ class DynamicSwarmEnv(gym.Env):
 
     def reset(self):
         self.sim.t = 0.
-        self.B1 = np.random.rand(3)*2-1
+        self.B1 = np.array([0., 1 + random(), 0.])  #np.random.rand(3)*2-1
         self.B2 = -self.B1
         self.pfc = ObstPFController(
             self.B1, self.B2, 6, [[.15]*3, [.07]*3], True)

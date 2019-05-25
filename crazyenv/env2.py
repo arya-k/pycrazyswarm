@@ -123,11 +123,8 @@ class StaticObstEnv(gym.Env):
 
     def reset(self):
         self.sim.t = 0.
-        self.B = np.random.normal([0, 0, 1], [.3]*3)
-        self.A = np.random.normal(self.B, [2.]*3)
-
-        while (np.linalg.norm(self.B-self.A) < 1.5 or np.linalg.norm(self.B - self.A) > 2.5):
-            self.A = np.random.normal(self.B, [2.]*3)
+        self.A = np.random.normal([0, 1, 0], [.3, .3, .3])
+        self.B = np.random.normal([0, -1, 0], [.3, .3, .3])
 
         self.pfc = PFController(self.A, self.B, 4, [[.15]*3, [.07]*3])
         self.sim._init_cfs([{'id': 1, 'pos': [self.A[0], self.A[1], 0]}])
@@ -158,7 +155,7 @@ class DynamicObstEnv(gym.Env):
     """ Gym Env to train a single drone to travel between two arbitrary points. """
 
     def __init__(self):
-        self.max_speed = .5  # m/s in a given direction
+        self.max_speed = .1  # m/s in a given direction
         self.dt = 0.1
 
         high_obs = np.array([np.finfo(np.float64).max]*10)
@@ -202,11 +199,8 @@ class DynamicObstEnv(gym.Env):
 
     def reset(self):
         self.sim.t = 0.
-        self.B = np.random.normal([0, 0, 1], [.3]*3)
-        self.A = np.random.normal(self.B, [2.]*3)
-
-        while (np.linalg.norm(self.B-self.A) < 1.5 or np.linalg.norm(self.B - self.A) > 2.5):
-            self.A = np.random.normal(self.B, [2.]*3)
+        self.A = np.random.normal([0, 1, 0], [.3, .3, .3])
+        self.B = np.random.normal([0, -1, 0], [.3, .3, .3])
 
         self.pfc = PFController(self.A, self.B, 6, [[.15]*3, [.07]*3], True)
         self.sim._init_cfs([{'id': 1, 'pos': [self.A[0], self.A[1], 0]}])

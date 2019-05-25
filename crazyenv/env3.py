@@ -15,8 +15,8 @@ class PFController():
     """ Potential field controller to model obstacles. """
 
     LAMBDA_1 = 1.  # scale of A -> B field
-    LAMBDA_2 = 0.04  # scale of obstacle avoidance field
-    P_STAR = .5  # ignore obstacles more than this far away.
+    LAMBDA_2 = 0.02  # scale of obstacle avoidance field
+    P_STAR = 1.  # ignore obstacles more than this far away.
 
     def error(positions, loc, target=[0., 0., 0.]):
         """ calculate the error at a specified loc location. """
@@ -25,6 +25,8 @@ class PFController():
         for position in positions:
             dist = np.linalg.norm(loc - position)
             dist = max(dist, 1e-5)  # minimum bound to avoid NaNs
+            if dist < 1e-5:
+                continue
             if (dist < PFController.P_STAR):
                 f_2 += .5 * PFController.LAMBDA_2 / (dist*dist)
         return f_2 + f_1
@@ -35,6 +37,8 @@ class PFController():
         v_2 = np.array([0.]*3)
         for position in positions:
             dist = np.linalg.norm(loc - position)
+            if dist < 1e-5:
+                continue
             dist = max(dist, 1e-5)  # minimum bound to avoid NaNs
             if (dist < PFController.P_STAR):
                 v_2 += (PFController.LAMBDA_2 / (dist**4)) * \
@@ -57,7 +61,7 @@ class StaticSwarmEnv(gym.Env):
         self.dt = 0.1
         self.num_robots = num_robots
 
-        high_obs = np.ones((num_robots*7,)) * np.finfo(np.float64).max
+        high_obs = np.ones((num_robots*10,)) * np.finfo(np.float64).max
         self.action_space = Box(
             low=-self.max_speed, high=self.max_speed, shape=(num_robots*3,), dtype=np.float64)
         self.observation_space = Box(
@@ -75,22 +79,23 @@ class StaticSwarmEnv(gym.Env):
 
         obs = self._obs()
         reward = self._reward(obs, actions)
-        return obs, reward, self.sim.t > 30 or PFController.isColliding(split_list(obs, 7)), {}
+        return obs, reward, self.sim.t > 30, {}
 
     def _obs(self):
         positions = [cf.position(self.sim.t) for cf in self.sim.crazyflies]
         observations = []
         for pos in positions:
             observations.extend(pos)
-            observations.extend(PFController.gradient(positions, pos))
+            observations.extend([0., 0., 0.])
             observations.append(PFController.error(positions, pos))
+            observations.extend(PFController.gradient(positions, pos))
         return observations
 
     def _reward(self, obs, actions):
         value = 0
-        for ob, action in zip(split_list(obs, 7), split_list(actions, 3)):
-            value += action.dot(ob[3:6]) / \
-                np.linalg.norm(action)/np.linalg.norm(ob[3:6])
+        for ob, action in zip(split_list(obs, 10), split_list(actions, 3)):
+            value += action.dot(ob[:3]) / \
+                np.linalg.norm(action)/np.linalg.norm(ob[:3])
         return value
 
     def reset(self):

@@ -17,15 +17,16 @@ model = PPO2(
     n_steps=256,
     policy_kwargs=policy_kwargs,
     nminibatches=256,
-    learning_rate=1e-4,
+    learning_rate=5e-4,
     cliprange=0.2,
     tensorboard_log='/home/um/tensorboards/',
     verbose=1
 )
 
-model.learn(
-    total_timesteps = 10000,
-    log_interval = 1
-)
-print("Finished training.")
-model.save("Hover1")
+for i in range(100):
+    model.learn(
+        total_timesteps=300000,
+        log_interval=1
+    )
+    print("Finished training {} times.".format(i))
+    model.save("Hover1")
