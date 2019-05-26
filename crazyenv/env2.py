@@ -192,9 +192,8 @@ class DynamicObstEnv(gym.Env):
 
     def _reward(self, obs, u):
         grad = self.pfc.gradient(obs[:3])
-        attraction = -1 * PFController.LAMBDA_1 * (obs[:3] - self.B)
-        # diff_reward = 1. / (.1 + (obs[:3] - self.B))
-        # + np.linalg.norm(diff_reward) # just try to match the gradient.
+        attraction = -1 * PFController.LAMBDA_1 * \
+            (obs[:3] - self.B)  # attractive field is not part of obs
         return np.dot(u, grad + attraction) - 5. * np.dot(u, u)
 
     def reset(self):

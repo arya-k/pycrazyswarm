@@ -7,6 +7,7 @@ from itertools import combinations
 
 
 def split_list(l, sublist_size):
+    """ Returns a list of lists. """
     for i in range(0, len(l), sublist_size):
         yield np.array(l[i:i+sublist_size])
 
@@ -55,6 +56,8 @@ class PFController():
 
 
 class StaticSwarmEnv(gym.Env):
+
+    """ Gym env to model a swarm of drones that converges on the origin without crashing. """
 
     def __init__(self, num_robots):
         self.max_speed = 0.1  # m/s in a given direction

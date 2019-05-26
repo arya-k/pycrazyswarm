@@ -1,3 +1,13 @@
+"""
+Visualizer used by all envs to see the environment.
+Uses the high performance, GPU accelerated library Vispy
+to allow for interactive viewing in all 3 dimensions.
+
+Supports multiple drones, moving obstacles, labelled points
+and a breakcrumbs trail behind a single drone to visualize the
+path taken.
+"""
+
 import os
 import math
 import numpy as np
@@ -9,12 +19,12 @@ from vispy.visuals import transforms
 from vispy.scene.cameras import TurntableCamera
 
 
-def get_color_names():
+def get_color_names():  # limit the number of colors for obstacles to ones that can easily be seen
     return ['crimson', 'cyan', 'darkblue', 'darkcyan', 'darkgoldenrod', 'darkgray', 'darkgreen', 'darkgrey', 'darkkhaki', 'darkmagenta', 'darkolivegreen', 'darkorange', 'darkorchid', 'darkred', 'darksalmon', 'darkseagreen', 'darkslateblue', 'darkslategray', 'darkslategrey', 'darkturquoise', 'darkviolet', 'deeppink', 'deepskyblue']
 
 
 class VisVispy:
-    def __init__(self, hidden=False):
+    def __init__(self, hidden=False):  # hidden=true useful for speed when creating video
         self.canvas = scene.SceneCanvas(keys='interactive', size=(1900, 1145), show=not hidden, config=dict(
             samples=4), resizable=True, always_on_top=True, bgcolor='white', vsync=True)
 
@@ -35,7 +45,7 @@ class VisVispy:
         # ground = scene.visuals.Plane(6.0, 6.0, direction="+z", color=(0.3, 0.3, 0.3, 1.0), parent=self.view.scene)
 
     def update(self, t, crazyflies, spheres=[], obstacles=[], crumb=None):
-        if len(self.cfs) == 0:
+        if len(self.cfs) == 0:  # add the crazyflies if they don't exist already
             verts, faces, normals, nothin = io.read_mesh(
                 os.path.join(os.path.dirname(__file__), "crazyflie2.obj.gz"))
             for i in range(0, len(crazyflies)):
@@ -44,8 +54,9 @@ class VisVispy:
                 mesh.transform = transforms.MatrixTransform()
                 self.cfs.append(mesh)
 
-        if crumb is not None:
+        if crumb is not None:  # add breadcrumb trails behind drones if requested.
             if len(self.crumbs) == 0 or np.linalg.norm(self.crumbs[-1]-crumb) > 0.05:
+                # Only add them if drone is sufficiently far from the last breakcrumb.
                 self.crumbs.append(crumb)
                 self.markers.set_data(
                     np.array(self.crumbs), size=5, face_color='black', edge_color='black')
@@ -73,6 +84,7 @@ class VisVispy:
             for i, (pos, size, _) in enumerate(obstacles):
                 self.obstacles[i].transform.translate = pos
 
+        # update the location of the crazyflies if they have changed
         for i in range(0, len(self.cfs)):
             x, y, z = crazyflies[i].position(t)
             roll, pitch, yaw = crazyflies[i].rpy(t)
@@ -84,7 +96,7 @@ class VisVispy:
             self.cfs[i].transform.scale((0.001, 0.001, 0.001))
             self.cfs[i].transform.translate((x, y, z))
 
-        self.canvas.app.process_events()
+        self.canvas.app.process_events()  # redraw the canvas
 
-    def close(self):
+    def close(self):  # we propogate close functions up to this point.
         self.canvas.close()

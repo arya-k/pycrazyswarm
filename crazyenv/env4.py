@@ -13,7 +13,7 @@ def split_list(l, sublist_size):
 
 
 class DronePFController():
-    """ Potential field controller to model obstacles. """
+    """ Potential field controller to model drones. Called from static context. """
 
     LAMBDA_1 = 1.  # scale of A -> B field
     LAMBDA_2 = 0.04  # scale of obstacle avoidance field
@@ -130,6 +130,8 @@ class ObstPFController():
 
 class SingleSwarmEnv(gym.Env):
 
+    """ Models a swarm of drones that goes from A to B, avoiding moving obstacles in the way. """
+
     def __init__(self, num_robots):
         self.max_speed = 0.6  # m/s in a given direction
         self.dt = 0.1
@@ -198,6 +200,8 @@ class SingleSwarmEnv(gym.Env):
 
 class DynamicSwarmEnv(gym.Env):
 
+    """ Coolest Env. Two swarms of drones swap places, while avoiding dynamic obstacles. """
+
     def __init__(self, num_robots):
         self.max_speed = 0.7  # m/s in a given direction
         self.dt = 0.1
@@ -223,7 +227,8 @@ class DynamicSwarmEnv(gym.Env):
 
         obs = self._obs()
         reward = self._reward(obs, actions)
-        return obs, reward, self.sim.t > 60, {} #or DronePFController.isColliding(split_list(obs, 10)) or any(self.pfc.hittingObstacles(o) for o in split_list(obs, 10)), {}
+        # or DronePFController.isColliding(split_list(obs, 10)) or any(self.pfc.hittingObstacles(o) for o in split_list(obs, 10)), {}
+        return obs, reward, self.sim.t > 60, {}
 
     def _obs(self):
         positions = [cf.position(self.sim.t) for cf in self.sim.crazyflies]
@@ -255,7 +260,7 @@ class DynamicSwarmEnv(gym.Env):
 
     def reset(self):
         self.sim.t = 0.
-        self.B1 = np.array([0., 1 + random(), 0.])  #np.random.rand(3)*2-1
+        self.B1 = np.array([0., 1 + random(), 0.])  # np.random.rand(3)*2-1
         self.B2 = -self.B1
         self.pfc = ObstPFController(
             self.B1, self.B2, 6, [[.15]*3, [.07]*3], True)

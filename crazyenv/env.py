@@ -35,18 +35,7 @@ class HoverEnv(gym.Env):
 
     def _reward(self, obs, u):
         diff = np.array([0., 0., 1.]) - obs
-        u_mag = np.linalg.norm(u)
-        # diff_mag = np.linalg.norm(diff)
-        # u_ = u / u_mag if u_mag else np.zeros(u.shape)
-        # diff_ = diff / diff_mag if diff_mag else np.zeros(diff.shape)
-        # cos_theta = np.clip(np.dot(u_, diff_), -1., 1.)
-
-        # dir_reward = 1. / (1.1 - cos_theta)
-        # dist_reward = 1. / (.1 + diff_mag)
-        movement_cost = u_mag * 0.1
-
-        # return dir_reward + dist_reward - movement_cost
-
+        movement_cost = np.linalg.norm(u) * 0.1
         return np.dot(u, diff) - movement_cost
 
     def reset(self, loc=[0, 0, 0]):

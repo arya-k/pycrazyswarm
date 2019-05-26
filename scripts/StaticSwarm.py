@@ -1,3 +1,11 @@
+"""
+First env using multiple drones at once. Initiate N=10
+drones at random locations, and then have them converge
+towards the origin, without crashing into each other.
+
+Network size had to be increased for this training to work.
+"""
+
 import gym
 import tensorflow as tf
 
@@ -5,11 +13,11 @@ from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common.vec_env import DummyVecEnv, SubprocVecEnv
 from stable_baselines import PPO2
 
-from crazyenv.env2 import StaticObstEnv
+from crazyenv.env3 import StaticSwarmEnv
 
-env = DummyVecEnv([lambda: StaticObstEnv()])
+env = DummyVecEnv([lambda: StaticSwarmEnv(10)])
 
-policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[200,200])
+policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[1000, 1000])
 
 model = PPO2(
     MlpPolicy, env,
@@ -30,16 +38,15 @@ model.learn(
 
 print("Finished training.")
 
-model.save("StaticNoAttraction3")
+model.save("NaiveSwarm3")
 # del model # remove to demonstrate saving and loading
-# model = PPO2.load("2")
+# model = PPO2.load("NaiveSwarm2")
 
 # Enjoy trained agent
 while True:
     obs = env.reset()
     done = False
     while not done:
-        action, _states = model.predict(obs, deterministic=True)
-        obs, rewards, done, info = env.step(action)
+        actions, _states = model.predict(obs, deterministic=True)
+        obs, rewards, done, info = env.step(actions)
         env.render()
-

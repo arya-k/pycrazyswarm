@@ -1,3 +1,11 @@
+"""
+Uses StableBaselines package, forked from OpenAI baselines,
+to meet the target env HoverEnv's goal. Is able to hover
+a drone at a height 1m above the origin. Uses varied training
+by not always starting the drone at the same spot. This helps address
+potential instabilities in flight paths.
+"""
+
 import gym
 import tensorflow as tf
 
@@ -23,6 +31,7 @@ model = PPO2(
     verbose=1
 )
 
+# iterated training, in case the final results are unstable.
 for i in range(100):
     model.learn(
         total_timesteps=300000,

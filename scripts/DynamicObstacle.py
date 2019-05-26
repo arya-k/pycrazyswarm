@@ -1,3 +1,11 @@
+"""
+Train a drone to travel from point A to B, while avoiding obstacles in the way.
+Unlike StaticObstEnv, we allow the obstacles to move around in this case.
+Obstacles are modeled as particle fields, a. la. PFCs
+Training is hyperthreaded (64x), but that means that visualization has
+to happen separately (see generate_movie in utils.)
+"""
+
 import gym
 import tensorflow as tf
 
