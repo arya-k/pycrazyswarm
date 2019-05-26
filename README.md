@@ -1,6 +1,6 @@
 # What is pycrazyswarm?
 
-Pycrazyswarm is a series of RL environments, trained using Proximal Policy Optimizations (PPOs), complete with a simulator for CrazyFlie drones, and a 3D visualizer. It's compatible with Tensorboard, and a host of other tools. We train using [https://github.com/hill-a/stable-baselines](Stable Baselines)'s implementation of PPO, and the simulator is loosely based off of the one found in [https://github.com/USC-ACTLab/crazyswarm](Crazyswarm).
+Pycrazyswarm is a series of RL environments, trained using Proximal Policy Optimizations (PPOs), complete with a simulator for CrazyFlie drones, and a 3D visualizer. It's compatible with Tensorboard, and a host of other tools. We train using [Stable Baselines](https://github.com/hill-a/stable-baselines)'s implementation of PPO, and the simulator is loosely based off of the one found in [Crazyswarm](https://github.com/USC-ACTLab/crazyswarm).
 
 # Installation
 
