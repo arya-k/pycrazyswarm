@@ -5,10 +5,12 @@ Pycrazyswarm is a series of RL environments, trained using Proximal Policy Optim
 # Installation
 
 On a fresh Ubuntu box:
-`$ sudo apt install git make gcc swig libpython-dev python-numpy python-yaml python-matplotlib
+```bash
+$ sudo apt install git make gcc swig libpython-dev python-numpy python-yaml python-matplotlib
 $ git clone https://github.com/arya-k/pycrazyswarm.git
 $ cd pycrazyswarm/crazyenv/cfsim
-$ chmod +x build.sh && ./build.sh`
+$ chmod +x build.sh && ./build.sh
+```
 
 Then, create a virtualenv, and install all the packages in `reqs.txt`.
 
